@@ -1,5 +1,7 @@
 #include<stdio.h>
 #include <stdlib.h>
+
+#define namebuf 100
 struct student{
     char * name;
     char * surname;
@@ -11,6 +13,7 @@ struct student{
 } ;
 
 void takeInput(char* filename,struct student **name_head,struct student  **surname_head,struct student **ID_head);
+void outputFile(char*filename,struct student*name_head,struct student*surname_head,struct student*ID_head);
 void insertNode(struct student **name_head,struct student **surname_head,struct student **ID_head, struct student *value);
-void deleteNode();
+void deleteNode(struct student **name_head,struct student **surname_head, struct student **ID_head);
 void printList(struct student *head,int val);

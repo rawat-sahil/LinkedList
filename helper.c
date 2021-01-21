@@ -9,15 +9,16 @@ void printList(struct student *head,int val){
     else if(val==2) printf("The list in ID sorted order\n");
 
     while(head!=NULL){
-        printf("%d. %s %s %ld\n",i,head->name,head->surname,head->ID);
+        printf("\t%d. %s %s %ld\n",i,head->name,head->surname,head->ID);
         if(val==0)head=head->name_next;
         else if(val==1)head=head->surname_next;
         else if(val==2)head=head->ID_next;
         i++;
     }
 
-    printf("\n\n");
+    printf("\v\v");
 }
+
 
 
 void insertNode(struct student**name_head,struct student**surname_head,struct student**ID_head, struct student *value){
@@ -63,9 +64,74 @@ void insertNode(struct student**name_head,struct student**surname_head,struct st
     *name_head=fake_head->name_next;
     *surname_head=fake_head->surname_next;
     *ID_head=fake_head->ID_next;
-
+    free(fake_head);
 
 }
+
+void deleteNode(struct student **name_head,struct student **surname_head, struct student **ID_head){
+
+// if the linked list is emtpy
+    if(*name_head==NULL){
+        printf("The linked list is empty\n");
+        return ;
+
+    }
+
+// take id as input and considering the id of all the students will be different
+    long int id;
+    printf("Enter the student ID: ");
+    scanf("%ld",&id);
+
+    int found=0;
+    struct student *fake_head=(struct student *)malloc(sizeof(struct student));
+
+// check for the node with the id same as id entered
+    fake_head->name_next=*name_head;
+    struct student *temp_head=fake_head;
+
+    while(temp_head->name_next!=NULL){
+        if(temp_head->name_next->ID==id){
+            found=1;
+            break;
+        }
+        temp_head=temp_head->name_next;
+    }
+
+//if id not found return
+    if(!found){
+        printf("ID not found\n");
+        return;
+    }
+// else delete the id from the name
+    temp_head->name_next=temp_head->name_next->name_next;
+
+// removing the pointer from the surname
+    fake_head->surname_next=*surname_head;
+    temp_head=fake_head;
+    while(temp_head->surname_next!=NULL && temp_head->surname_next->ID!=id){
+        temp_head=temp_head->surname_next;
+    }
+    temp_head->surname_next=temp_head->surname_next->surname_next;
+
+// removing the pointer from the id
+    fake_head->ID_next=*ID_head;
+    temp_head=fake_head;
+    while(temp_head->ID_next!=NULL && temp_head->ID_next->ID!=id){
+        temp_head=temp_head->ID_next;
+    }
+    struct student * toBeFreed=temp_head->ID_next;
+    temp_head->ID_next=temp_head->ID_next->ID_next;
+
+// updating the pointer
+    *name_head=fake_head->name_next;
+    *surname_head=fake_head->surname_next;
+    *ID_head=fake_head->ID_next;
+    free(fake_head);
+    printf("The student %s %s\t%ld is deleted from the list!\n",toBeFreed->name,toBeFreed->surname,toBeFreed->ID);
+    free(toBeFreed);
+
+}
+
 
 
 void takeInput(char* filename,struct student**name_head,struct student**surname_head,struct student**ID_head){
@@ -75,24 +141,20 @@ void takeInput(char* filename,struct student**name_head,struct student**surname_
         exit(-1);
     }
 
-    char buff[100];
-    // struct student temp[100];
+    char buff[namebuf];
+    // struct student temp[namebuf];
     // int i=0;
     while(fscanf(file,"%s",buff)==1){
         // printf("entered\n");
-        char* firstName=(char*)malloc(100*sizeof(char));
-        char* lastName=(char*)malloc(100*sizeof(char));
+        char* firstName=(char*)malloc(namebuf*sizeof(char));
+        char* lastName=(char*)malloc(namebuf*sizeof(char));
         long int id;
         strcpy(firstName,buff);
         fscanf(file,"%s",buff);
         strcpy(lastName,buff);
         fscanf(file,"%s",buff);
         id=atol(buff);
-        // printf("%s %s %ld\n",firstName,lastName,id);
-        // temp[i].name=firstName;
-        // temp[i].surname=lastName;
-        // temp[i].ID=id;
-        // i++;
+
 
         //create temp student and add it to the linked list
         struct student *temp=(struct student *)malloc(sizeof(struct student));
@@ -102,10 +164,48 @@ void takeInput(char* filename,struct student**name_head,struct student**surname_
         insertNode(name_head,surname_head,ID_head,temp);
 
     }
+    fclose(file);
 
-    // for(int i=0;i<100;++i){
-    //     printf("%s %s %ld\n",temp[i].name,temp[i].surname,temp[i].ID);
-    // }
 
+}
+
+
+void outputFile(char*filename,struct student*name_head,struct student*surname_head,struct student*ID_head){
+    FILE *file=fopen(filename,"w");
+
+// write name in alphabetical order
+    fprintf(file,"The list in name-alphabetical order:\n");
+    int i=1;
+    while(name_head!=NULL){
+        fprintf(file,"\t%d. %s %s \t%ld\n",i,name_head->name,name_head->surname,name_head->ID);
+        name_head=name_head->name_next;
+        i++;
+    }
+    fprintf(file,"\v\v");
+
+
+    // write in surname-alphabetical order
+    fprintf(file,"The list in surname-alphabetical order:\n");
+    i=1;
+    while(surname_head!=NULL){
+        fprintf(file,"\t%d. %s %s \t%ld\n",i,surname_head->name,surname_head->surname,surname_head->ID);
+        surname_head=surname_head->surname_next;
+        i++;
+    }
+    fprintf(file,"\v\v");
+
+
+    // write in the ID order
+    fprintf(file,"The list in ID sorted order:\n");
+    i=1;
+    while(ID_head!=NULL){
+        fprintf(file,"\t%d. %s %s \t%ld\n",i,ID_head->name,ID_head->surname,ID_head->ID);
+        ID_head=ID_head->ID_next;
+        i++;
+    }
+    fprintf(file,"\v\v");
+
+// close the file
+    fclose(file);
 
 }
